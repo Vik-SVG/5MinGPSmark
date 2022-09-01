@@ -1,33 +1,49 @@
 package com.priesniakov.a5mingpsmark
 
+import android.annotation.SuppressLint
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import androidx.navigation.fragment.findNavController
+import com.priesniakov.a5mingpsmark.core.BaseFragment
 import com.priesniakov.a5mingpsmark.databinding.FragmentFirstBinding
+import com.priesniakov.a5mingpsmark.utils.LocationFacade
+import com.priesniakov.a5mingpsmark.utils.PermissionManager
+import com.priesniakov.a5mingpsmark.utils.PermissionManagerImpl
+import com.priesniakov.a5mingpsmark.utils.checkIfLocationPermissionEnabled
 
-class FirstFragment : Fragment() {
 
-    private var _binding: FragmentFirstBinding? = null
-    private val binding get() = _binding!!
+class FirstFragment : BaseFragment<FragmentFirstBinding>(FragmentFirstBinding::inflate) {
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        _binding = FragmentFirstBinding.inflate(inflater, container, false)
-        return binding.root
-    }
+    private var locationFacade: LocationFacade? = null
+    private var permissionManager: PermissionManager? = null
 
+    @SuppressLint("MissingPermission")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        initInstances()
+        setupListeners()
+    }
 
+    private fun setupListeners() {
+        binding.buttonFirst.setOnClickListener {
+            if (requireContext().checkIfLocationPermissionEnabled()) {
+                locationFacade?.requestLocation()
+            } else {
+                permissionManager?.launchPermissionActivity()
+            }
+        }
+    }
+
+    private fun initInstances() {
+        locationFacade = LocationFacade(requireContext())
+        permissionManager = PermissionManagerImpl(this)
+        permissionManager?.onPermissionSuccessCallback = {
+            locationFacade?.requestLocation()
+        }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null
+        permissionManager = null
+        locationFacade = null
     }
 }
