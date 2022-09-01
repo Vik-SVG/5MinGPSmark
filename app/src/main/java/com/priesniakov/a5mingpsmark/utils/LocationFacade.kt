@@ -8,8 +8,12 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 
+interface LocationFacade {
+    var onSuccessLocationCallback: (Location?) -> Unit
+    fun requestLocation()
+}
 
-class LocationFacade(private val context: Context) {
+class LocationFacadeImpl(private val context: Context) : LocationFacade {
 
     private var fusedLocationClient: FusedLocationProviderClient =
         LocationServices.getFusedLocationProviderClient(context)
@@ -18,15 +22,13 @@ class LocationFacade(private val context: Context) {
         const val TAG_LOCATION = "TagLocation"
     }
 
+    override lateinit var onSuccessLocationCallback: (Location?) -> Unit
+
     @SuppressLint("MissingPermission")
-    fun requestLocation() {
+    override fun requestLocation() {
         if (context.checkIfLocationPermissionEnabled()) {
             fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
-                Log.d(
-                    TAG_LOCATION,
-                    location?.latitude.toString() + " " +
-                            location?.longitude
-                )
+                onSuccessLocationCallback(location)
             }
         }
     }
