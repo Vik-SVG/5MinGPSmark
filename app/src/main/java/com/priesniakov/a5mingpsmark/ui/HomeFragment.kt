@@ -10,12 +10,17 @@ import com.priesniakov.a5mingpsmark.location.LocationAlarm
 import com.priesniakov.a5mingpsmark.location.LocationAlarmImpl
 import com.priesniakov.a5mingpsmark.location.LocationService
 import com.priesniakov.a5mingpsmark.utils.*
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import kotlin.properties.Delegates
 
 
+@AndroidEntryPoint
 class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::inflate) {
 
-    private var locationAlarm: LocationAlarm? = null
+    @Inject
+    lateinit var locationAlarm: LocationAlarm
+
     private var permissionManager: PermissionManager? = null
 
     private var isServiceRunning: Boolean by Delegates.observable(false) { _, _, _ ->
@@ -35,16 +40,14 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
     override fun onDestroyView() {
         super.onDestroyView()
         permissionManager = null
-        locationAlarm = null
     }
 
     private fun initInstances() {
-        locationAlarm = LocationAlarmImpl(requireContext())
         permissionManager = PermissionManagerImpl(this)
     }
 
     private fun setupButtonObservables() {
-        isAlarmRunning = locationAlarm?.isAlarmActive() == true
+        isAlarmRunning = locationAlarm.isAlarmActive() == true
         isServiceRunning = requireContext().isServiceRunning(
             LocationService::class.java
         )
@@ -80,17 +83,17 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
 
     private fun startAlarmManager() {
         if (requireContext().checkIfLocationPermissionEnabled()) {
-            locationAlarm?.setupLocationAlarm()
+            locationAlarm.setupLocationAlarm()
         } else {
             permissionManager?.onPermissionSuccessCallback = {
-                locationAlarm?.setupLocationAlarm()
+                locationAlarm.setupLocationAlarm()
             }
             permissionManager?.launchPermissionActivity()
         }
     }
 
     private fun stopAlarmManager() {
-        locationAlarm?.cancelAlarm()
+        locationAlarm.cancelAlarm()
     }
 
     private fun startLocationService() {

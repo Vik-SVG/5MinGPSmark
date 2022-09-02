@@ -5,6 +5,8 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 
 interface LocationAlarm {
     fun setupLocationAlarm()
@@ -12,11 +14,12 @@ interface LocationAlarm {
     fun isAlarmActive(): Boolean
 }
 
-class LocationAlarmImpl(private val context: Context) : LocationAlarm {
+class LocationAlarmImpl @Inject constructor(@ApplicationContext val context: Context) :
+    LocationAlarm {
     companion object {
         private const val ALARM_DELAY_IN_SECOND = 10
         private const val ALARM_REQUEST_CODE = 345345
-        private const val INTERVAL = 1000L * 60 * 1
+        private const val INTERVAL = 1000L * 60 * 5
     }
 
     private val alarmTimeAtUTC = System.currentTimeMillis() + ALARM_DELAY_IN_SECOND * 1_000L
@@ -65,7 +68,7 @@ class LocationAlarmImpl(private val context: Context) : LocationAlarm {
     }
 
     override fun cancelAlarm() {
-            alarmManager.cancel(getPendingIntent())
-            getPendingIntent().cancel()
+        alarmManager.cancel(getPendingIntent())
+        getPendingIntent().cancel()
     }
 }

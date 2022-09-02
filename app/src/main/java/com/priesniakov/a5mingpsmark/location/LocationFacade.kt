@@ -6,6 +6,8 @@ import android.location.Location
 import android.os.Looper
 import com.google.android.gms.location.*
 import com.priesniakov.a5mingpsmark.utils.checkIfLocationPermissionEnabled
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 
 interface LocationFacade {
     var onSuccessLocationCallback: (Location?) -> Unit
@@ -14,12 +16,15 @@ interface LocationFacade {
     fun stopLocationUpdates()
 }
 
-class LocationFacadeImpl(private val context: Context) : LocationFacade {
+class LocationFacadeImpl @Inject constructor(@ApplicationContext val context: Context) :
+    LocationFacade {
 
     companion object {
         const val TAG_LOCATION = "TagLocation"
         private const val REQUEST_INTERVAL = 1000L * 60 * 5
     }
+
+    override lateinit var onSuccessLocationCallback: (Location?) -> Unit
 
     private var fusedLocationClient: FusedLocationProviderClient =
         LocationServices.getFusedLocationProviderClient(context)
@@ -52,8 +57,6 @@ class LocationFacadeImpl(private val context: Context) : LocationFacade {
     override fun stopLocationUpdates() {
         fusedLocationClient.removeLocationUpdates(updateLocationCallback)
     }
-
-    override lateinit var onSuccessLocationCallback: (Location?) -> Unit
 
     @SuppressLint("MissingPermission")
     override fun requestLocation() {
