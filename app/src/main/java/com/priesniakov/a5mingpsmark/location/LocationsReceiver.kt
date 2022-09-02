@@ -1,4 +1,4 @@
-package com.priesniakov.a5mingpsmark.utils
+package com.priesniakov.a5mingpsmark.location
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -9,6 +9,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class LocationsReceiver : BroadcastReceiver() {
+
+    companion object{
+        const val ACTION = "LocationReceiverAction"
+    }
 
     private val scope = CoroutineScope(Dispatchers.IO)
 

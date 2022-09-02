@@ -10,5 +10,9 @@
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
     <string name="get_location_by_alarm">GET LOCATION BY ALARM</string>
+    <string name="stop_location_alarm">STOP LOCATION ALARM</string>
     <string name="get_location_by_service">GET LOCATION BY SERVICE</string>
+    <string name="stop_location_service">STOP LOCATION SERVICE</string>
+    <string name="location_service">Location service</string>
+    <string name="gathering_location">Location service is gathering location now</string>
 </resources>

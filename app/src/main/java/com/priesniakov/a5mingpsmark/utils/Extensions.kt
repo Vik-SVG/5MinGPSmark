@@ -1,6 +1,7 @@
 package com.priesniakov.a5mingpsmark.utils
 
 import android.Manifest
+import android.app.ActivityManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
@@ -22,4 +23,11 @@ fun Context.checkIfLocationPermissionEnabled(): Boolean {
     } else {
         mainPermissions
     }
+}
+
+@Suppress("DEPRECATION")
+fun Context.isServiceRunning(serviceClass: Class<*>): Boolean {
+    val manager = this.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+    return manager.getRunningServices(Integer.MAX_VALUE)
+        .any { it.service.className == serviceClass.name }
 }

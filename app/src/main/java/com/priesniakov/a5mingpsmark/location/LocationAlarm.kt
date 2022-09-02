@@ -1,4 +1,4 @@
-package com.priesniakov.a5mingpsmark.utils
+package com.priesniakov.a5mingpsmark.location
 
 import android.app.AlarmManager
 import android.app.PendingIntent
@@ -8,12 +8,14 @@ import android.os.Build
 
 interface LocationAlarm {
     fun setupLocationAlarm()
+    fun cancelAlarm()
+    fun isAlarmActive(): Boolean
 }
 
 class LocationAlarmImpl(private val context: Context) : LocationAlarm {
     companion object {
         private const val ALARM_DELAY_IN_SECOND = 10
-        private const val ALARM_REQUEST_CODE = 345
+        private const val ALARM_REQUEST_CODE = 345345
         private const val INTERVAL = 1000L * 60 * 1
     }
 
@@ -21,7 +23,8 @@ class LocationAlarmImpl(private val context: Context) : LocationAlarm {
 
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-    private val intent = Intent(context, LocationsReceiver::class.java)
+    private val intent =
+        Intent(context, LocationsReceiver::class.java).apply { action = LocationsReceiver.ACTION }
 
     private val intentFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
@@ -29,7 +32,13 @@ class LocationAlarmImpl(private val context: Context) : LocationAlarm {
         PendingIntent.FLAG_UPDATE_CURRENT
     }
 
-    private val pendingIntent = PendingIntent.getBroadcast(
+    private val intentFlagsNoCreate = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_NO_CREATE
+    } else {
+        PendingIntent.FLAG_NO_CREATE
+    }
+
+    private fun getPendingIntent() = PendingIntent.getBroadcast(
         context,
         ALARM_REQUEST_CODE,
         intent, intentFlags
@@ -40,7 +49,23 @@ class LocationAlarmImpl(private val context: Context) : LocationAlarm {
             AlarmManager.RTC_WAKEUP,
             alarmTimeAtUTC,
             INTERVAL,
-            pendingIntent
+            getPendingIntent()
         )
+    }
+
+    override fun isAlarmActive(): Boolean {
+        val pendingIntent: PendingIntent? =
+            PendingIntent.getBroadcast(
+                context,
+                ALARM_REQUEST_CODE,
+                intent,
+                intentFlagsNoCreate
+            )
+        return pendingIntent != null
+    }
+
+    override fun cancelAlarm() {
+            alarmManager.cancel(getPendingIntent())
+            getPendingIntent().cancel()
     }
 }
